@@ -25,6 +25,6 @@ class User:
 		self.budget = self.budget + amount
 	
 	def take_money(self, amount):
-		self.budget = self.budget + amount
+		self.budget = self.budget - amount
 	
 
