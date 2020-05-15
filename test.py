@@ -5,14 +5,14 @@ class CourseManagementSystem:
 		self.admin_menu = self.build_menus("admin")
 		self.student_menu = self.build_menus("student")
 		self.admin_money_sub_menu = self.build_menus("admin_money_sub")
+		self.student_money_sub_menu = self.build_menus("student_money_sub")
+		print("****Welcome to Course Management System****")
 		self.current_user = self.login()
-		if type(self.current_user) is Student:
-			self.show_student_menu()
-		elif type(self.current_user) is Admin:
-			self.show_admin_menu()
+		self.manage_login()
 			
 	
 	def login(self):
+		print("\nPlease provide login information\n")
 		userId = input("Please enter your Id: ")
 		password = input("Please enter your password: ")
 		#check if the user exist
@@ -20,11 +20,20 @@ class CourseManagementSystem:
 			if self.users[userId].password == password:
 				self.current_user = self.users[userId]
 				print("Login success.")
-				return self.users[userId]
+				return self.current_user
 			else:
 				print("Wrong password")
 		else:
 			print("No such user")
+		return None
+		
+	def manage_login(self):
+		if type(self.current_user) is Student:
+			self.show_student_menu()
+		elif type(self.current_user) is Admin:
+			self.show_admin_menu()
+		else:
+			 return None
 	
 	def build_menus(self, menu_type):
 		if menu_type == "admin":
@@ -63,16 +72,22 @@ class CourseManagementSystem:
 			admin_money_sub_menu = Menu(admin_money_sub_menu_items, "")
 			return admin_money_sub_menu
 			
+		elif menu_type == "student_money_sub":
+			student_money_sub_menu_items = []
+			student_money_sub_menu_items.append(MenuItem("Add money", 1))
+			student_money_sub_menu_items.append(MenuItem("Go to main menu", 2))
+						
+			student_money_sub_menu = Menu(student_money_sub_menu_items, "")
+			return student_money_sub_menu
+			
 		
 	def show_student_menu(self):
 		while True:
-			for i in self.student_menu.items:
-				print(str(i.number)+"- " + i.text)
-		
+			print("\nWelcome " + self.current_user.userId + " What do you want to do?")
 			#getting input from user
-			inp = input("Your choise: ")
-			
+			inp = self.student_menu.display(False)
 			if inp == "1":
+				print("")
 				self.display_courses(self.courses)
 				try:
 					inp = int(input("please Enter a valid course number:"))
@@ -87,12 +102,16 @@ class CourseManagementSystem:
 						if self.current_user.can_take_course(self.courses[inp-1]):
 							print(self.courses[inp-1].name + " added successfully, money has taken from your account.")
 							self.current_user.add_course(self.courses[inp-1])
-							self.current_user.take_money(self.current_user.registered_courses[inp-1].course_price())
+							self.current_user.take_money(self.courses[inp-1].course_price())
+							self.courses[inp-1].registered_users.append(self.current_user)
+						else:
+							print("You can't take this course.")
 				
 				except:
 					print("You had to enter a number.")
 			
 			elif inp == "2":
+				print("")
 				#delete if we have a course
 				if len(self.current_user.registered_courses)>0:
 					self.display_courses(self.current_user.registered_courses)
@@ -111,13 +130,16 @@ class CourseManagementSystem:
 				else:
 					print("You have no course")
 			elif inp == "3":
-				self.display_courses(self.current_user.registered_courses)
+				print("")
+				if len(self.current_user.registered_courses)>0:
+					self.display_courses(self.current_user.registered_courses)
+				else:
+					print("You have no course")
 			
 			elif inp == "4":
 				print('\n#### BUDGET MENU #####')
 				print('Your budget is: {}'.format(self.current_user.budget))
-				print('What do you want to do?\n1-Add Money\n2-Go to main menu')
-				inp = input("Your choise:")
+				inp = self.student_money_sub_menu.display(False)
 				if inp == "1":
 					while True:
 						try:
@@ -128,23 +150,26 @@ class CourseManagementSystem:
 						except:
 							print("please enter a valid value")
 			elif inp == "5":
-				break
-								
-		
+				print("")
+				self.current_user = self.login()
+				login = self.manage_login()
+				while login is None:
+					self.current_user = self.login()
+					login = self.manage_login()
 		
 	def show_admin_menu(self):
 		while True:
-			for i in self.admin_menu.items:
-				print(str(i.number)+"- " + i.text)
-				
+			print("")
 			#getting input from user
-			inp = input("Your choise: ")
+			inp = self.admin_menu.display(True)			
+			
 			
 			if inp == "1":
-				print("*** Offered Courses ***")
+				print("\n*** Offered Courses ***")
 				self.display_courses(self.courses)
 				
 			elif inp == "2":
+				print("")
 				name = input("What is the name of the course that you want to add? : ")
 				credit = int(input("How many credits this course has? : "))
 				price = int(input("How much should the course cost? : "))
@@ -158,44 +183,49 @@ class CourseManagementSystem:
 					print("Course has not added.")
 			
 			elif inp == "3":
-				if len(self.courses) == 0:
-					print("There is no course")
+				print("")
+			
+				self.display_courses(self.courses)
+				inp = int(input("Which course do you want to delete?"))
+				
+				if inp > len(self.courses):
+					print("Please enter a valid number")
 				else:
-					self.display_courses(self.courses)
-					inp = int(input("Which course do you want to delete?"))
-					
-					if inp > len(self.courses):
-						print("Please enter a valid number")
-					else:
-						print(self.courses[inp-1].name + " has been deleted and money has been transferred back to student accounts")
-						for student in self.users.values():
-							if type(student) is Student:
-								student.add_money(self.courses[inp-1].course_price())
-						self.courses.remove(self.courses[inp-1])
+					print(self.courses[inp-1].name + " has been deleted and money has been transferred back to student accounts")
+					for student in self.users.values():
+						if type(student) is Student and student.course_exist(self.courses[inp-1]):
+							student.add_money(self.courses[inp-1].course_price())
+							student.registered_courses.remove(self.courses[inp-1])
+					self.courses.remove(self.courses[inp-1])
 					
 			elif inp == "4":
-				inp = input("Which course do you want to show? : ")
+				inp = input("\nWhich course do you want to show? : ")
+				
 				for course in self.courses:
 					if course.name == inp:
-						print("Students taking " + course.name)
-						for index,std in enumerate(course.registered_users,1):
-							print('{}-{}'.format(index,std.userId))
+						if len(course.registered_users) == 0:
+							print("There is no student")
+						else:
+							print("Students taking " + course.name)
+							for index,std in enumerate(course.registered_users,1):
+								print('{}-{}'.format(index,std.userId))
 			
 			elif inp == "5":
 				while True:
-					for i in self.admin_money_sub_menu.items:
-						print(str(i.number)+"- " + i.text)
-					
-					inp = input("Your choise: ")
-					
+					print("")
+					inp = self.admin_money_sub_menu.display(False)
+					#the student list created for reaching the user easily
 					students = []
 					if inp == "1":
+						print("")
 						if len(self.users.values()) == 0:
 							print("There is no student")
 						else:	
 							for index,std in enumerate(self.users.values(),1):
+								#adding students to list
 								students.append(std)
 								print('{}-{}'.format(index,std.userId))
+							#this index is for reaching student which is student[inp-1]
 							inp = int(input("Which user do you want add money to their account?"))
 							if inp > len(self.users.values()):
 								print("Please enter a valid number")
@@ -209,6 +239,7 @@ class CourseManagementSystem:
 									print("New budget: " + str(self.users[student.userId].budget))
 					
 					elif inp == "2":
+						print("")
 						if len(self.users.values()) == 0:
 							print("There is no student")
 						else:	
@@ -223,13 +254,18 @@ class CourseManagementSystem:
 								money = int(input("How much money do you want to subtract? : "))
 								sure = input((str(money) + "$ will be subtracted to " + student.userId + "\nAre you sure?[Y/N]: "))
 								if sure == "Y" or sure == "y":
-									self.users[student.userId].take_money(money)
-									print("Money subtracted successfully")
-									print("New budget: " + str(self.users[student.userId].budget))
+									if student.budget >= money:
+										self.users[student.userId].take_money(money)
+										print("Money subtracted successfully")
+										print("New Budget: " + str(self.users[student.userId].budget))
+									else:
+										print("Insufficient balance. Fail to subtract")
 					elif inp == "3":
 						break
+			
 				
 			elif inp == "6":
+				print("")
 				if len(self.users.values()) == 0:
 					print("There is no user")
 				else:
@@ -238,6 +274,7 @@ class CourseManagementSystem:
 						print('{}-{}'.format(index,std.userId))
 					
 			elif inp == "7":
+				print("")
 				Id = input("What is the Id(name) of user that you want to create? : ")		
 				password = input("What is the password for account? : ")
 				budget = int(input("How much money do you want user to have?"))
@@ -247,6 +284,7 @@ class CourseManagementSystem:
 				print("The new user has been added successfully!")
 											
 			elif inp == "8":
+				print("")
 				students = []
 				if len(self.users.values()) == 0:
 					print("There is no user")
@@ -260,10 +298,18 @@ class CourseManagementSystem:
 						print("please enter a valid number")
 					else:
 						print(students[inp-1].userId + " deleted!")
+						#remove student from its courses registered_user list
+						for course in students[inp-1].registered_courses:
+							course.registered_users.remove(students[inp-1])
 						del self.users[students[inp-1].userId]
-			elif inp == "9":
-				self.current_user = self.login()
 				
+			elif inp == "9":
+				print("")
+				self.current_user = self.login()
+				login = self.manage_login()
+				while login is None:
+					self.current_user = self.login()
+					login = self.manage_login()
 			         
          
 	def build_courses(self):
@@ -295,8 +341,10 @@ class CourseManagementSystem:
 		return users
 		
 	def display_courses(self, courses):
-		print ('Course Name\tCredit')
-		for index,item in enumerate(courses,1):print ('{}-{}\t{}'.format(index,item.name,item.credits))
+		print ('Course Name\tCredit\tPrice')
+		for index,item in enumerate(courses,1):
+			print ('{}-{}\t{}\t{}'.format(index, item.name, item.credits, item.course_price()))
+		
 		
 	def isInputIncludedInAllCourses(self, inp):
 		for course in self.courses:
@@ -313,9 +361,10 @@ class User:
 		self.registered_courses = registered_courses
 
 	def can_take_course(self, course):
-		if course.course_price() <= self.budget:
+		if self.budget >= course.course_price():
 			return True
-		return False
+		else:
+			return False
 
 	def course_exist(self, course):
 		if course in self.registered_courses:
@@ -332,18 +381,21 @@ class User:
 		self.budget = self.budget + amount
 	
 	def take_money(self, amount):
-		self.budget = self.budget - amount
+		if self.budget - amount < 0:
+			print("Insufficent balance")
+		else:
+			self.budget = self.budget - amount
 	
 
 class Course:
-	def __init__(self, name, credits, price):
+	def __init__(self, name, credit, price):
 		self.name = name
-		self.credits = credits
+		self.credits = credit
 		self.registered_users = []
 		self._price = price
 
 	def display(self):
-		print(self.name + "/t" + str(self.credits))
+		print(self.name + "\t" + str(self.credits))
 
 	def delete_course(self):
 		pass
@@ -368,10 +420,10 @@ class Menu:
 	def display(self, display_header):
 		if display_header:
 			print(self.header)
-			
 		for i in self.items:
-			print (i.display())
-		return int(input("Please select an operation: "))
+			print(str(i.number)+"- " + i.text)
+		
+		return input("Your choise ")
 		
 	def add_menu_item(self, text, number):
 		item = MenuItem(text, number)
