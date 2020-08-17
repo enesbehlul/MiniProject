@@ -13,12 +13,12 @@ class CourseManagementSystem:
 	
 	def login(self):
 		print("\nPlease provide login information\n")
-		userId = input("Please enter your Id: ")
+		user_id = input("Please enter your Id: ")
 		password = input("Please enter your password: ")
 		#check if the user exist
-		if userId in self.users:
-			if self.users[userId].password == password:
-				self.current_user = self.users[userId]
+		if user_id in self.users:
+			if self.users[user_id].password == password:
+				self.current_user = self.users[user_id]
 				print("Login success.")
 				return self.current_user
 			else:
@@ -83,7 +83,7 @@ class CourseManagementSystem:
 		
 	def show_student_menu(self):
 		while True:
-			print("\nWelcome " + self.current_user.userId + " What do you want to do?")
+			print("\nWelcome " + self.current_user.user_id + " What do you want to do?")
 			#getting input from user
 			inp = self.student_menu.display(False)
 			if inp == "1":
@@ -208,7 +208,7 @@ class CourseManagementSystem:
 						else:
 							print("Students taking " + course.name)
 							for index,std in enumerate(course.registered_users,1):
-								print('{}-{}'.format(index,std.userId))
+								print('{}-{}'.format(index,std.user_id))
 			
 			elif inp == "5":
 				while True:
@@ -224,7 +224,7 @@ class CourseManagementSystem:
 							for index,std in enumerate(self.users.values(),1):
 								#adding students to list
 								students.append(std)
-								print('{}-{}'.format(index,std.userId))
+								print('{}-{}'.format(index,std.user_id))
 							#this index is for reaching student which is student[inp-1]
 							inp = int(input("Which user do you want add money to their account?"))
 							if inp > len(self.users.values()):
@@ -232,11 +232,11 @@ class CourseManagementSystem:
 							else:							
 								student = students[inp-1]
 								money = int(input("How much money do you want to add? : "))
-								sure = input((str(money) + "$ will be added to " + student.userId + "\nAre you sure?[Y/N]: "))
+								sure = input((str(money) + "$ will be added to " + student.user_id + "\nAre you sure?[Y/N]: "))
 								if sure == "Y" or sure == "y":
-									self.users[student.userId].add_money(money)
+									self.users[student.user_id].add_money(money)
 									print("Money added successfully")
-									print("New budget: " + str(self.users[student.userId].budget))
+									print("New budget: " + str(self.users[student.user_id].budget))
 					
 					elif inp == "2":
 						print("")
@@ -245,19 +245,19 @@ class CourseManagementSystem:
 						else:	
 							for index,std in enumerate(self.users.values(),1):
 								students.append(std)
-								print('{}-{}'.format(index,std.userId))
+								print('{}-{}'.format(index,std.user_id))
 							inp = int(input("Which user do you want subtract money to their account?"))
 							if inp > len(self.users.values()):
 								print("Please enter a valid number")
 							else:							
 								student = students[inp-1]
 								money = int(input("How much money do you want to subtract? : "))
-								sure = input((str(money) + "$ will be subtracted to " + student.userId + "\nAre you sure?[Y/N]: "))
+								sure = input((str(money) + "$ will be subtracted to " + student.user_id + "\nAre you sure?[Y/N]: "))
 								if sure == "Y" or sure == "y":
 									if student.budget >= money:
-										self.users[student.userId].take_money(money)
+										self.users[student.user_id].take_money(money)
 										print("Money subtracted successfully")
-										print("New Budget: " + str(self.users[student.userId].budget))
+										print("New Budget: " + str(self.users[student.user_id].budget))
 									else:
 										print("Insufficient balance. Fail to subtract")
 					elif inp == "3":
@@ -271,7 +271,7 @@ class CourseManagementSystem:
 				else:
 					print("Current users:")
 					for index,std in enumerate(self.users.values(),1):
-						print('{}-{}'.format(index,std.userId))
+						print('{}-{}'.format(index,std.user_id))
 					
 			elif inp == "7":
 				print("")
@@ -280,7 +280,7 @@ class CourseManagementSystem:
 				budget = int(input("How much money do you want user to have?"))
 				
 				student = Student(Id, password, budget, [])
-				self.users[student.userId] = student
+				self.users[student.user_id] = student
 				print("The new user has been added successfully!")
 											
 			elif inp == "8":
@@ -291,17 +291,17 @@ class CourseManagementSystem:
 				else:
 					for index,std in enumerate(self.users.values(),1):
 						students.append(std)
-						print('{}-{}'.format(index,std.userId))
+						print('{}-{}'.format(index,std.user_id))
 						
 					inp = int(input("Which user do you want to delete:"))
 					if inp > len(self.users.values()):
 						print("please enter a valid number")
 					else:
-						print(students[inp-1].userId + " deleted!")
+						print(students[inp-1].user_id + " deleted!")
 						#remove student from its courses registered_user list
 						for course in students[inp-1].registered_courses:
 							course.registered_users.remove(students[inp-1])
-						del self.users[students[inp-1].userId]
+						del self.users[students[inp-1].user_id]
 				
 			elif inp == "9":
 				print("")
@@ -334,9 +334,9 @@ class CourseManagementSystem:
 		
 		admin = Admin('admin', 'admin', 10000, [])
 		
-		users[student1.userId] = student1
-		users[student2.userId] = student2
-		users[admin.userId] = admin
+		users[student1.user_id] = student1
+		users[student2.user_id] = student2
+		users[admin.user_id] = admin
 		
 		return users
 		
@@ -354,8 +354,8 @@ class CourseManagementSystem:
 
 
 class User:
-	def __init__(self, userId, password, budget, registered_courses):
-		self.userId = userId
+	def __init__(self, user_id, password, budget, registered_courses):
+		self.user_id = user_id
 		self.password = password
 		self.budget = budget
 		self.registered_courses = registered_courses
@@ -430,14 +430,14 @@ class Menu:
 		self.items.append(item)
 
 class Student(User):
-	def __init__(self, userId, password, budget, registered_courses):
-		User.__init__(self, userId, password, budget, registered_courses)
+	def __init__(self, user_id, password, budget, registered_courses):
+		User.__init__(self, user_id, password, budget, registered_courses)
 		for course in registered_courses:
 			course.registered_users.append(self)
 
 class Admin(User):
-	def __init__(self, userId, password, budget, registered_courses):
-		User.__init__(self, userId, password, budget, registered_courses)
+	def __init__(self, user_id, password, budget, registered_courses):
+		User.__init__(self, user_id, password, budget, registered_courses)
 
 
 		
