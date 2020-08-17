@@ -346,7 +346,7 @@ class CourseManagementSystem:
 			print ('{}-{}\t{}\t{}'.format(index, item.name, item.credits, item.course_price()))
 		
 		
-	def isInputIncludedInAllCourses(self, inp):
+	def is_input_included_in_all_courses(self, inp):
 		for course in self.courses:
 			if course.name == inp:
 				return course
