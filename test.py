@@ -13,7 +13,7 @@ class CourseManagementSystem:
 	
 	def login(self):
 		print("\nPlease provide login information\n")
-		user_id = input("Please enter your Id: ")
+		user_id = input("Please enter your id: ")
 		password = input("Please enter your password: ")
 		#check if the user exist
 		if user_id in self.users:
@@ -275,11 +275,11 @@ class CourseManagementSystem:
 					
 			elif inp == "7":
 				print("")
-				Id = input("What is the Id(name) of user that you want to create? : ")		
+				id = input("What is the id(name) of user that you want to create? : ")		
 				password = input("What is the password for account? : ")
 				budget = int(input("How much money do you want user to have?"))
 				
-				student = Student(Id, password, budget, [])
+				student = Student(id, password, budget, [])
 				self.users[student.user_id] = student
 				print("The new user has been added successfully!")
 											
