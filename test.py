@@ -338,6 +338,7 @@ class CourseManagementSystem:
 		users[student2.user_id] = student2
 		users[admin.user_id] = admin
 		a = 8
+		b = 0
 		
 		return users
 		
