@@ -272,6 +272,7 @@ class CourseManagementSystem:
 					print("Current users:")
 					for index,std in enumerate(self.users.values(),1):
 						print('{}-{}'.format(index,std.user_id))
+						a = 5
 					
 			elif inp == "7":
 				print("")
