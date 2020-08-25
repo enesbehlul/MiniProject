@@ -442,4 +442,4 @@ class Admin(User):
 
 
 		
-a = CourseManagementSystem()
+#a = CourseManagementSystem()
