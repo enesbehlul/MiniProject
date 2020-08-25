@@ -12,7 +12,7 @@ class CourseManagementSystem:
 			
 	
 	def login(self):
-		print("\nPlease provide login information\n")
+		print("\nPlease provide login information!\n")
 		user_id = input("Please enter your id: ")
 		password = input("Please enter your password: ")
 		#check if the user exist
